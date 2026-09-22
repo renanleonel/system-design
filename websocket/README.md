@@ -21,6 +21,45 @@ WebSockets provide a persistent, full-duplex connection between browser and serv
 4. Either side can send messages whenever it needs to; this example sends a random number from server to browser every second, and accepts a message from the browser.
 5. The UI updates from the socket `message` callback; it does not poll the server.
 
+### The HTTP upgrade handshake
+
+The connection begins as one normal HTTP `GET` request. A browser turns it into a WebSocket handshake by adding headers similar to these:
+
+```http
+GET /api/ws HTTP/1.1
+Host: localhost:3000
+Connection: Upgrade
+Upgrade: websocket
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Sec-WebSocket-Version: 13
+Origin: http://localhost:3000
+```
+
+`Sec-WebSocket-Key` is a freshly generated, one-use value that lets the client verify the server really accepted this handshake. It is not a password or an authentication token. `Sec-WebSocket-Version: 13` identifies the modern WebSocket protocol version. `Origin` identifies the page that initiated the connection; a production server should validate it against an allowlist, but should not use it as authentication.
+
+If the server accepts the upgrade, it returns an HTTP response rather than a second request:
+
+```http
+HTTP/1.1 101 Switching Protocols
+Connection: Upgrade
+Upgrade: websocket
+Sec-WebSocket-Accept: <value derived from Sec-WebSocket-Key>
+```
+
+After that `101` response, the same underlying TCP connection no longer carries HTTP requests and responses. It carries WebSocket frames until either side closes it.
+
+### What the browser handles for you
+
+When a browser supports the native `WebSocket` API, application code only provides the URL and registers event handlers:
+
+```ts
+const socket = new WebSocket('ws://localhost:3000/api/ws');
+```
+
+The browser generates `Sec-WebSocket-Key`, sends the required upgrade and version headers, includes `Origin`, checks the `101 Switching Protocols` response and `Sec-WebSocket-Accept`, and encodes or decodes WebSocket frames. It also exposes the result as `open`, `message`, `error`, and `close` events.
+
+The API does **not** manage reconnection, acknowledgements, message schemas, authorization, origin validation on the server, or application-level heartbeats. Browser code also cannot attach arbitrary custom headers to `new WebSocket()`; use cookies, a short-lived URL token, or an initial authenticated application message when appropriate.
+
 The browser WebSocket API does **not** reconnect automatically. Production applications should choose and implement a reconnection policy, then consider message IDs or acknowledgements when missed messages matter.
 
 ## Advantages and disadvantages
@@ -47,8 +86,8 @@ sequenceDiagram
     participant Server as Node HTTP and WebSocket server
 
     React->>WebSocket: Create WebSocket for api ws
-    WebSocket->>Server: HTTP Upgrade request
-    Server-->>WebSocket: 101 Switching Protocols
+    WebSocket->>Server: GET /api/ws with Upgrade, Key, Version, Origin
+    Server-->>WebSocket: 101 Switching Protocols with Sec-WebSocket-Accept
     WebSocket-->>React: open event
 
     loop Every second
