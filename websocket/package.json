@@ -1,0 +1,32 @@
+{
+  "name": "websocket",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx server.ts --dev",
+    "build": "next build",
+    "start": "tsx server.ts",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@types/ws": "^8.18.1",
+    "clsx": "^2.1.1",
+    "next": "16.3.5",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tailwind-merge": "^3.7.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.5",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@10.28.2"
+}

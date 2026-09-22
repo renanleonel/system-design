@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-page: #f4f7fb;
+  --color-ink: #17202a;
+  --color-paper: #fffdfa;
+  --color-line: #d9e0e8;
+  --color-brand: #1d4ed8;
+  --shadow-card: 0 18px 50px rgb(35 55 80 / 9%);
+  --radius-card: 18px;
+  --radius-code: 9px;
+  --text-display: clamp(6rem, 22vw, 10rem);
+  --tracking-display: -0.08em;
+  --leading-display: 0.8;
+}
